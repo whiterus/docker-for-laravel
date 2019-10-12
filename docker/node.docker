@@ -1,0 +1,9 @@
+ARG NODE_VERSION=8.9-alpine
+
+FROM node:${NODE_VERSION}
+
+ENV PATH $PATH:$NVM_DIR/versions/node/v${NODE_VERSION}/bin
+
+RUN npm i -g yarn
+
+WORKDIR /var/www

@@ -1,0 +1,57 @@
+version: '2'
+services:
+    nginx:
+        build:
+            context: ./
+            dockerfile: docker/nginx.docker
+        volumes:
+            - ./:/var/www
+        ports:
+            - "80:80"
+        links:
+            - php-fpm
+    php-fpm:
+        build:
+            context: ./
+            dockerfile: docker/php-fpm.docker
+        volumes:
+            - ./:/var/www
+        links:
+            - mysql
+            - redis
+            - elasticsearch
+    mysql:
+        image: mysql:8
+        volumes:
+            - ./docker/storage/mysql:/var/lib/mysql
+        environment:
+            - "MYSQL_ROOT_PASSWORD=secret"
+            - "MYSQL_DATABASE=laravel"
+            - "MYSQL_USER=app"
+            - "MYSQL_PASSWORD=secret"
+        ports:
+            - "33061:3306"
+    redis:
+        image: redis:5
+        ports:
+            - "63791:6379"
+    node:
+        build:
+            context: ./
+            dockerfile: docker/node.docker
+        volumes:
+            - ./:/var/www
+        tty: true
+    elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:6.2.2
+        environment:
+            - bootstrap.memory_lock=true
+            - "ES_JAVA_OPTS=-Xms128m -Xmx128m"
+        ulimits:
+          memlock:
+            soft: -1
+            hard: -1
+        volumes:
+            - ./docker/storage/elasticsearch:/usr/share/elasticsearch/data
+        ports:
+            - "9201:9200"
